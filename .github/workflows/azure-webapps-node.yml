@@ -5,18 +5,23 @@ on:
         branches: [ master ]
     
 jobs:
-    deploy:
-        runs-on: self-hosted
-    
-    strategy: 
-        matrix:
-            node-version: [12.x]
-            
+  test:
+    name: Test on node ${{ matrix.node_version }} and ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node_version: ['8', '10', '12']
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
     steps:
-      - name: Use node
-        uses: actions/setup-node@v2
-        with:
-            node-version: '12.13.0'
-            check-latest: true
-    -  name: Install dependencies
-       run: npm ci
+    - uses: actions/checkout@v1
+    - name: Use Node.js ${{ matrix.node_version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node_version }}
+
+    - name: npm install, build and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm test
